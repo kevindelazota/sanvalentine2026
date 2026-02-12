@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Para Veronica y Carbomci</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- ESTILOS GENERALES Y UI --- */
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #ffe6ea;
+            font-family: 'Quicksand', sans-serif;
+            touch-action: none;
+            user-select: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        canvas {
+            display: block;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        /* --- PANTALLAS (Menús) --- */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(255, 240, 243, 0.98) 0%, rgba(255, 214, 224, 0.98) 100%);
+            z-index: 20;
+            transition: opacity 0.8s ease;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+            z-index: -1;
+            display: none !important;
+        }
+
+        h1 {
+            font-family: 'Great Vibes', cursive;
+            color: #d63384;
+            font-size: 3.5rem;
+            margin: 0 0 20px 0;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
+        }
+
+        h2 {
+            font-family: 'Great Vibes', cursive;
+            color: #ff4757;
+            font-size: 2.8rem;
+            margin-bottom: 30px;
+        }
+
+        p {
+            color: #664d55;
+            font-size: 1.1rem;
+            max-width: 600px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.5);
+            padding: 15px;
+            border-radius: 15px;
+        }
+
+        /* --- BOTONES --- */
+        .btn {
+            background: linear-gradient(45deg, #ff6b81, #ff4757);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: bold;
+            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            -webkit-tap-highlight-color: transparent;
+            margin: 5px;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 10px rgba(255, 71, 87, 0.4);
+        }
+        
+        /* Botones especiales IA */
+        .btn-ai {
+            background: linear-gradient(45deg, #a55eea, #4b7bec);
+            border: 2px solid rgba(255,255,255,0.5);
+        }
+
+        /* --- UI DE LA PROPUESTA --- */
+        .buttons-container {
+            display: flex;
+            gap: 30px; /* Más espacio entre botones */
+            margin-top: 30px;
+            position: relative;
+            width: 100%;
+            height: 200px; /* Altura suficiente para que el NO se mueva inicialmente */
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        #btn-yes {
+            background: linear-gradient(45deg, #2ed573, #7bed9f);
+            z-index: 100;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 1.3rem; /* Un poco más grande de base */
+            padding: 18px 40px;
+        }
+
+        #btn-no {
+            background: linear-gradient(45deg, #ff4757, #ff6b81);
+            position: absolute; /* Posición absoluta inicial */
+            top: 0;
+            left: 50%; /* Centrado inicialmente */
+            transform: translateX(60px); /* Desplazado a la derecha del SÍ */
+            transition: top 0.3s, left 0.3s;
+            z-index: 101; /* Asegurar que se vea y se pueda intentar clickear */
+        }
+
+        /* --- MENSAJE DE GAME OVER --- */
+        #game-over-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            display: none;
+            z-index: 30;
+            border: 2px solid #ff6b81;
+        }
+
+        /* --- ELEMENTOS DECORATIVOS --- */
+        .heart-particle {
+            position: absolute;
+            font-size: 24px;
+            pointer-events: none;
+            animation: floatUp 3s linear forwards;
+            z-index: 50;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-100vh) scale(1.5); opacity: 0; }
+        }
+
+        /* Indicador de salto para móvil */
+        #tap-hint {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: rgba(102, 77, 85, 0.6);
+            font-size: 0.9rem;
+            animation: pulse 2s infinite;
+            pointer-events: none;
+        }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+        /* --- UI DEL FINAL (IA) --- */
+        #ai-container {
+            position: absolute;
+            bottom: 20px;
+            width: 90%;
+            text-align: center;
+            z-index: 40;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        #ai-result-box {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            min-height: 50px;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 2px solid #ffd700;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            font-style: italic;
+            color: #2c3e50;
+            display: none;
+            font-size: 0.95rem;
+            width: 100%;
+        }
+
+        .loading-dots:after {
+            content: ' .';
+            animation: dots 1s steps(5, end) infinite;
+        }
+        @keyframes dots {
+            0%, 20% { color: rgba(0,0,0,0); text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0);}
+            40% { color: #333; text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0);}
+            60% { text-shadow: .25em 0 0 #333, .5em 0 0 rgba(0,0,0,0);}
+            80%, 100% { text-shadow: .25em 0 0 #333, .5em 0 0 #333;}
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- AUDIO -->
+    <audio id="bg-music" loop>
+        <source src="https://commondatastorage.googleapis.com/codeskulptor-assets/Epoq-Lepidoptera.ogg" type="audio/ogg">
+    </audio>
+    <audio id="win-music">
+        <source src="https://commondatastorage.googleapis.com/codeskulptor-assets/week7-brrring.m4a" type="audio/mp4"> 
+    </audio>
+
+    <div id="game-container">
+        
+        <!-- PANTALLA 1: INICIO -->
+        <div id="start-screen" class="screen">
+            <h1>Hola Veronica ❤️</h1>
+            <p>Carbomci tiene una misión muy importante y necesita tu ayuda para completarla.</p>
+            <p>¡El camino está lleno de peligros! ¿Podrás guiarlo a salvo?</p>
+            <p style="font-size: 0.9rem; background: none; padding: 0;">(Toca la pantalla para saltar)</p>
+            <button class="btn" onclick="startGame()">¡Comenzar Misión!</button>
+        </div>
+
+        <!-- CANVAS DEL JUEGO -->
+        <canvas id="gameCanvas"></canvas>
+        <div id="tap-hint" style="display:none;">Toca para saltar</div>
+
+        <!-- OVERLAY DE GAME OVER -->
+        <div id="game-over-overlay">
+            <h3 style="color: #ff4757; margin: 0 0 10px 0;">¡Oh no! 🥺</h3>
+            <p style="margin: 0 0 15px 0; font-size: 1rem;">Carbomci chocó. ¡Pero no se rinde!</p>
+            <button class="btn" style="padding: 10px 30px; font-size: 1rem;" onclick="resetGame()">Intentar de nuevo</button>
+        </div>
+
+        <!-- PANTALLA 2: LA PROPUESTA -->
+        <div id="proposal-screen" class="screen hidden">
+            <h1>¡Lo lograste! 🎉</h1>
+            <p>Gracias a ti, Carbomci llegó sano y salvo a su destino. Y ahora, él tiene una pregunta muy especial para ti...</p>
+            <h2>¿Quieres ser mi San Valentín?</h2>
+            
+            <div class="buttons-container">
+                <!-- Botón SÍ centrado y grande -->
+                <button id="btn-yes" class="btn" onclick="acceptProposal()">¡SÍ, ME ENCANTARÍA! 😍</button>
+                <!-- Botón NO posicionado absolutamente a su lado -->
+                <button id="btn-no" class="btn" onmouseover="moveNo()" onclick="moveNo()">Mmm... no sé 🤔</button>
+            </div>
+        </div>
+
+        <!-- PANTALLA 3: CENA ROMÁNTICA (CON IA) -->
+        <div id="final-screen" class="screen hidden" style="padding: 0; background: #1e1e2e;">
+            <canvas id="finalCanvas"></canvas>
+            
+            <div style="position: absolute; top: 5%; width: 100%; text-align: center; z-index: 30;">
+                <h1 style="color: #fff; font-size: 2.8rem; text-shadow: 0 0 10px #ff6b81;">¡Feliz San Valentín!</h1>
+            </div>
+
+            <!-- UI FLOTANTE PARA IA -->
+            <div id="ai-container">
+                <div id="ai-result-box"></div>
+                
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                    <button class="btn btn-ai" onclick="generateLoveLetter()">
+                        ✨ Carta Mágica de Kevin
+                    </button>
+                    <button class="btn btn-ai" style="background: linear-gradient(45deg, #f0932b, #ffbe76);" onclick="generateDogThought()">
+                        🐾 ¿Qué piensa Carbomci?
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- CONFIGURACIÓN GEMINI API ---
+        const apiKey = ""; // La clave se inyectará automáticamente
+        
+        async function callGemini(prompt) {
+            const displayBox = document.getElementById('ai-result-box');
+            displayBox.style.display = 'block';
+            displayBox.innerHTML = 'Conectando con las estrellas<span class="loading-dots"></span>';
+            displayBox.scrollTop = 0; // Scroll al inicio
+            
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            
+            const data = {
+                contents: [{
+                    parts: [{ text: prompt }]
+                }]
+            };
+
+            const delays = [1000, 2000, 4000];
+            for (let i = 0; i <= delays.length; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+                    
+                    const json = await response.json();
+                    const text = json.candidates?.[0]?.content?.parts?.[0]?.text || "Las estrellas están nubladas hoy, pero te quiero igual.";
+                    
+                    return text;
+                } catch (error) {
+                    if (i === delays.length) {
+                        return "Hubo un pequeño problema mágico. Pero recuerda: Te amo.";
+                    }
+                    await new Promise(resolve => setTimeout(resolve, delays[i]));
+                }
+            }
+        }
+
+        async function generateLoveLetter() {
+            const prompt = "Escribe una carta de amor muy breve (máximo 35 palabras), romántica, sincera y un poco divertida para Veronica de parte de Kevin. Estamos en una cena de San Valentín con vino. Menciona lo guapa que está y a nuestro perrito Carbomci. Tono: Profundamente enamorado.";
+            const text = await callGemini(prompt);
+            
+            const displayBox = document.getElementById('ai-result-box');
+            displayBox.innerHTML = `<strong>💌 De Kevin para Veronica:</strong><br>"${text}"`;
+        }
+
+        async function generateDogThought() {
+            const prompt = "Actúa como un perrito grifón de Bruselas negro y barbudo llamado Carbomci. Di una frase corta (máximo 20 palabras) graciosa y tierna sobre mis dueños Veronica y Kevin en su cena de San Valentín. Quizás pensando en que me den comida, en lo cursis que son, o en que yo soy el verdadero regalo.";
+            const text = await callGemini(prompt);
+            
+            const displayBox = document.getElementById('ai-result-box');
+            displayBox.innerHTML = `<strong>🐶 Carbomci piensa:</strong><br>"${text}"`;
+        }
+
+        // --- CONFIGURACIÓN E INICIALIZACIÓN JUEGO ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const finalCanvas = document.getElementById('finalCanvas');
+        const finalCtx = finalCanvas.getContext('2d');
+        
+        let canvasWidth, canvasHeight;
+
+        function resize() {
+            canvasWidth = window.innerWidth;
+            canvasHeight = window.innerHeight;
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+            finalCanvas.width = canvasWidth;
+            finalCanvas.height = canvasHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Estados del Juego
+        let gameState = 'START'; 
+        let frame = 0;
+        let gameSpeed = 6; // Un poco más rápido
+        let score = 0;
+        const targetScore = 1500; // Un poco más largo
+
+        // --- ASSETS GENERADOS POR CÓDIGO ---
+        
+        // --- CARBOMCI (REDIBUJADO REALISTA/TIERNO) ---
+        const dog = {
+            x: 50,
+            y: 0,
+            width: 55, 
+            height: 50,
+            vy: 0,
+            gravity: 0.7,
+            jumpPower: -13, // Salto más potente
+            isJumping: false,
+            groundY: 0,
+            
+            draw: function() {
+                const x = this.x;
+                const y = this.y;
+                const furColor = '#1a1a1a'; // Negro intenso
+                const muzzleColor = '#2d2d2d'; // Un poco más claro para el hocico
+                
+                // Cuerpo (Más peludo y compacto)
+                ctx.fillStyle = furColor;
+                ctx.beginPath();
+                // Usamos varios círculos para simular pelo
+                ctx.arc(x + 30, y + 30, 20, 0, Math.PI * 2); // Centro
+                ctx.arc(x + 15, y + 35, 15, 0, Math.PI * 2); // Trasero
+                ctx.arc(x + 45, y + 25, 18, 0, Math.PI * 2); // Pecho
+                ctx.fill();
+
+                // Cabeza (Redonda y con barba)
+                ctx.beginPath();
+                ctx.arc(x + 45, y + 15, 20, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Barba y Cejas características (Pelos desordenados)
+                ctx.strokeStyle = furColor;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                // Barba
+                for(let i=0; i<10; i++) {
+                    let randX = (Math.random() - 0.5) * 20;
+                    let randY = Math.random() * 10;
+                    ctx.moveTo(x + 45 + randX, y + 25);
+                    ctx.lineTo(x + 45 + randX + (Math.random()-0.5)*5, y + 35 + randY);
+                }
+                // Cejas
+                 for(let i=0; i<6; i++) {
+                    let randX = (Math.random() - 0.5) * 15;
+                    ctx.moveTo(x + 45 + randX, y + 5);
+                    ctx.lineTo(x + 45 + randX + (Math.random()-0.5)*5, y - 5);
+                }
+                ctx.stroke();
+
+
+                // Orejas (Pequeñas y caídas)
+                ctx.fillStyle = furColor;
+                ctx.beginPath();
+                ctx.ellipse(x + 28, y + 8, 8, 12, 0.8, 0, Math.PI * 2); // Izq
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(x + 62, y + 8, 8, 12, -0.8, 0, Math.PI * 2); // Der
+                ctx.fill();
+
+                // Hocico (Chato)
+                ctx.fillStyle = muzzleColor;
+                ctx.beginPath();
+                ctx.ellipse(x + 45, y + 20, 10, 7, 0, 0, Math.PI * 2);
+                ctx.fill();
+                // Nariz
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(x + 45, y + 18, 3.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Ojos (Grandes, redondos y expresivos)
+                const eyeY = y + 12;
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(x + 36, eyeY, 5, 0, Math.PI * 2); // Izq
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(x + 54, eyeY, 5, 0, Math.PI * 2); // Der
+                ctx.fill();
+                // Pupilas grandes
+                ctx.fillStyle = '#3e2723'; // Marrón muy oscuro
+                ctx.beginPath();
+                ctx.arc(x + 36, eyeY, 3.5, 0, Math.PI * 2);
+                ctx.arc(x + 54, eyeY, 3.5, 0, Math.PI * 2);
+                ctx.fill();
+                // Brillo
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(x + 34, eyeY - 1.5, 1.5, 0, Math.PI * 2);
+                ctx.arc(x + 52, eyeY - 1.5, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Collar Rojo
+                ctx.strokeStyle = '#d63031';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.arc(x + 45, y + 28, 15, 0.3, Math.PI - 0.3);
+                ctx.stroke();
+                // Plaquita
+                ctx.fillStyle = '#fdcb6e';
+                ctx.beginPath();
+                ctx.arc(x + 45, y + 40, 4, 0, Math.PI*2);
+                ctx.fill();
+
+                // Patitas (Animadas)
+                ctx.fillStyle = furColor;
+                const legAnim = Math.sin(frame * 0.4) * 6;
+                // Traseras
+                ctx.beginPath(); ctx.arc(x + 20, y + 48 + legAnim, 7, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(x + 30, y + 48 - legAnim, 7, 0, Math.PI*2); ctx.fill();
+                // Delanteras
+                ctx.beginPath(); ctx.arc(x + 50, y + 45 + legAnim, 7, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.arc(x + 60, y + 45 - legAnim, 7, 0, Math.PI*2); ctx.fill();
+
+                // Cola (Pequeña y rápida)
+                ctx.strokeStyle = furColor;
+                ctx.lineWidth = 5;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(x + 15, y + 30);
+                let tailWag = Math.sin(frame * 0.8) * 5;
+                ctx.lineTo(x + 5, y + 20 + tailWag);
+                ctx.stroke();
+            },
+            
+            update: function() {
+                this.y += this.vy;
+                if (this.y + this.height < this.groundY) {
+                    this.vy += this.gravity;
+                    this.isJumping = true;
+                } else {
+                    this.vy = 0;
+                    this.y = this.groundY - this.height;
+                    this.isJumping = false;
+                }
+            },
+            
+            jump: function() {
+                if (!this.isJumping) {
+                    this.vy = this.jumpPower;
+                }
+            }
+        };
+
+        // --- OBSTÁCULOS VARIADOS ---
+        let obstacles = [];
+        let clouds = [];
+        let house = null;
+
+        // Clase base para obstáculos
+        class Obstacle {
+            constructor(type) {
+                this.x = canvasWidth;
+                this.type = type;
+                this.markedForDeletion = false;
+                this.w = 40;
+                this.h = 40;
+                // Configuración según tipo
+                if (type === 'spike') {
+                    this.y = dog.groundY - 20;
+                    this.w = 50; this.h = 20;
+                } else if (type === 'rock') {
+                    this.y = dog.groundY - 35;
+                    this.w = 40; this.h = 35;
+                } else if (type === 'bigDog') {
+                    this.y = dog.groundY - 50;
+                    this.w = 70; this.h = 50;
+                }
+            }
+            draw() {
+                const x = this.x; const y = this.y; const w = this.w; const h = this.h;
+                if (this.type === 'spike') {
+                    // Pinchos
+                    ctx.fillStyle = '#95a5a6';
+                    ctx.beginPath();
+                    ctx.moveTo(x, y + h);
+                    ctx.lineTo(x + w/4, y);
+                    ctx.lineTo(x + w/2, y + h);
+                    ctx.lineTo(x + 3*w/4, y);
+                    ctx.lineTo(x + w, y + h);
+                    ctx.fill();
+                } else if (this.type === 'rock') {
+                    // Roca
+                    ctx.fillStyle = '#7f8c8d';
+                    ctx.beginPath();
+                    ctx.moveTo(x + 10, y + h);
+                    ctx.lineTo(x, y + h - 10);
+                    ctx.lineTo(x + 10, y);
+                    ctx.lineTo(x + w - 10, y + 5);
+                    ctx.lineTo(x + w, y + h - 5);
+                    ctx.lineTo(x + w - 15, y + h);
+                    ctx.fill();
+                } else if (this.type === 'bigDog') {
+                    // Perro grande dormido (Bulldog marrón)
+                    ctx.fillStyle = '#8d6e63'; // Cuerpo
+                    ctx.beginPath();
+                    ctx.ellipse(x + w/2, y + h/2 + 5, w/2, h/3, 0, 0, Math.PI*2);
+                    ctx.fill();
+                    // Cabeza
+                    ctx.beginPath();
+                    ctx.arc(x + w/4, y + h/2, h/2.5, 0, Math.PI*2);
+                    ctx.fill();
+                    // Oreja caída
+                    ctx.fillStyle = '#6d4c41';
+                    ctx.beginPath();
+                    ctx.ellipse(x + w/4 - 10, y + h/3, 8, 12, 0.5, 0, Math.PI*2);
+                    ctx.fill();
+                    // Morro y "Zzz"
+                    ctx.fillStyle = '#fff';
+                    ctx.font = "16px Arial";
+                    ctx.fillText("Zzz...", x + w - 20, y);
+                }
+            }
+            update() {
+                this.x -= gameSpeed;
+                if (this.x < -100) this.markedForDeletion = true;
+            }
+        }
+
+        class House {
+            constructor() {
+                this.x = canvasWidth;
+                this.y = dog.groundY - 120;
+                this.w = 140;
+                this.h = 120;
+            }
+            draw() {
+                const x = this.x;
+                const y = this.y;
+                
+                ctx.fillStyle = '#fce4ec'; // Paredes
+                ctx.fillRect(x, y + 40, 120, 80);
+                
+                ctx.fillStyle = '#ff7675'; // Techo
+                ctx.beginPath();
+                ctx.moveTo(x - 10, y + 40);
+                ctx.lineTo(x + 60, y - 10);
+                ctx.lineTo(x + 130, y + 40);
+                ctx.fill();
+                
+                ctx.fillStyle = '#6d4c41'; // Puerta
+                ctx.fillRect(x + 45, y + 70, 30, 50);
+                ctx.fillStyle = '#ffd700'; // Pomo
+                ctx.beginPath();
+                ctx.arc(x + 70, y + 95, 3, 0, Math.PI*2);
+                ctx.fill();
+
+                // Ventana
+                ctx.fillStyle = '#b2bec3';
+                ctx.fillRect(x + 10, y + 60, 25, 25);
+                ctx.strokeStyle = '#dfe6e9';
+                ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(x+22.5, y+60); ctx.lineTo(x+22.5, y+85); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(x+10, y+72.5); ctx.lineTo(x+35, y+72.5); ctx.stroke();
+
+                ctx.fillStyle = '#555';
+                ctx.font = "16px Quicksand";
+                ctx.fillText("Hogar Dulce Hogar", x + 15, y + 25);
+            }
+            update() {
+                this.x -= gameSpeed;
+            }
+        }
+
+        // --- LÓGICA DEL JUEGO ---
+
+        function initGame() {
+            frame = 0;
+            score = 0;
+            gameSpeed = 6; 
+            obstacles = [];
+            house = null;
+            dog.x = 50;
+            dog.vy = 0;
+        }
+
+        function checkCollision(rect1, rect2) {
+            // Hitbox del perro un poco más pequeña que el dibujo para ser justos
+            const dogBox = {
+                x: rect1.x + 15, y: rect1.y + 15,
+                w: rect1.width - 30, h: rect1.height - 20
+            };
+            return (dogBox.x < rect2.x + rect2.w &&
+                    dogBox.x + dogBox.w > rect2.x &&
+                    dogBox.y < rect2.y + rect2.h &&
+                    dogBox.y + dogBox.h > rect2.y);
+        }
+
+        function gameLoop() {
+            if (gameState !== 'PLAYING' && gameState !== 'ARRIVED') return;
+
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            ctx.fillStyle = '#81ecec'; // Cielo
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            
+            dog.groundY = canvasHeight - 100;
+            ctx.fillStyle = '#55efc4'; // Suelo
+            ctx.fillRect(0, dog.groundY, canvasWidth, 100);
+            
+            // Patrón del suelo
+            ctx.fillStyle = '#00b894';
+            for (let i = 0; i < canvasWidth; i += 40) {
+                if ((i + frame * gameSpeed) % 80 < 40) {
+                    ctx.fillRect((i - (frame * gameSpeed) % 40), dog.groundY, 40, 10);
+                }
+            }
+
+            // Nubes
+            if (frame % 100 === 0) {
+                clouds.push({x: canvasWidth, y: Math.random() * (canvasHeight/3), s: Math.random() * 1 + 0.5});
+            }
+            clouds.forEach((c, i) => {
+                c.x -= c.s;
+                ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                ctx.beginPath();
+                ctx.arc(c.x, c.y, 20, 0, Math.PI*2);
+                ctx.arc(c.x+15, c.y-10, 25, 0, Math.PI*2);
+                ctx.arc(c.x+30, c.y, 20, 0, Math.PI*2);
+                ctx.fill();
+                if (c.x < -100) clouds.splice(i, 1);
+            });
+
+            if (gameState === 'PLAYING') {
+                score++;
+                // Generar Obstáculos Aleatorios
+                if (score < targetScore - 400) { 
+                    // Frecuencia de aparición variable
+                    let spawnRate = Math.max(60, 150 - Math.floor(score/10));
+                    if (frame % spawnRate === 0) {
+                        const rand = Math.random();
+                        let type = 'rock';
+                        if (rand < 0.33) type = 'spike';
+                        else if (rand < 0.66) type = 'bigDog';
+                        obstacles.push(new Obstacle(type));
+                    }
+                } else if (score >= targetScore && !house) {
+                    house = new House();
+                }
+            }
+
+            obstacles.forEach((ob, index) => {
+                ob.update();
+                ob.draw();
+
+                if (checkCollision(dog, ob)) {
+                    gameOver();
+                }
+                
+                if (ob.markedForDeletion) obstacles.splice(index, 1);
+            });
+
+            if (house) {
+                house.update();
+                house.draw();
+                if (dog.x > house.x + 50) {
+                    arrivedHome();
+                }
+            }
+
+            dog.update();
+            dog.draw();
+
+            frame++;
+            if (gameState === 'PLAYING' || gameState === 'ARRIVED') {
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        // --- CONTROLES ---
+        function jumpAction(e) {
+            if (e && e.type === 'touchstart') e.preventDefault(); 
+            if (gameState === 'PLAYING') dog.jump();
+        }
+
+        window.addEventListener('touchstart', jumpAction, {passive: false});
+        window.addEventListener('mousedown', jumpAction);
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.code === 'ArrowUp') jumpAction();
+        });
+
+        // --- FLUJO DEL JUEGO ---
+
+        function startGame() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('tap-hint').style.display = 'block';
+            // Intentar reproducir música con interacción del usuario
+            const bgMusic = document.getElementById('bg-music');
+            bgMusic.volume = 0.5;
+            bgMusic.play().catch(e => console.log("Audio play error:", e));
+            gameState = 'PLAYING';
+            initGame();
+            gameLoop();
+        }
+
+        function gameOver() {
+            gameState = 'GAMEOVER';
+            document.getElementById('game-over-overlay').style.display = 'block';
+        }
+
+        function resetGame() {
+            document.getElementById('game-over-overlay').style.display = 'none';
+            gameState = 'PLAYING';
+            initGame();
+            gameLoop();
+        }
+
+        function arrivedHome() {
+            gameState = 'ARRIVED'; 
+            gameSpeed = 0; 
+            
+            setTimeout(() => {
+                const canvasEl = document.getElementById('gameCanvas');
+                canvasEl.style.transition = "opacity 1s";
+                canvasEl.style.opacity = "0";
+                document.getElementById('tap-hint').style.display = 'none';
+                
+                setTimeout(() => {
+                    canvasEl.style.display = 'none';
+                    document.getElementById('proposal-screen').classList.remove('hidden');
+                    // Asegurar que el botón NO esté en su posición inicial
+                    const btnNo = document.getElementById('btn-no');
+                    btnNo.style.position = 'absolute';
+                    btnNo.style.top = '0';
+                    btnNo.style.left = '50%';
+                    btnNo.style.transform = 'translateX(60px)';
+                }, 1000);
+            }, 1000);
+        }
+
+        // --- LÓGICA DE PROPUESTA (BOTÓN NO ESCURRIDIZO) ---
+        const btnNo = document.getElementById('btn-no');
+        const btnYes = document.getElementById('btn-yes');
+        let scaleFactor = 1;
+        
+        function moveNo() {
+            // Calcular nueva posición aleatoria segura dentro de la pantalla
+            const padding = 20;
+            const maxX = window.innerWidth - btnNo.offsetWidth - padding;
+            const maxY = window.innerHeight - btnNo.offsetHeight - padding;
+            
+            const x = Math.max(padding, Math.random() * maxX);
+            const y = Math.max(padding, Math.random() * maxY);
+            
+            // Cambiar a fixed para movimiento libre por toda la pantalla
+            btnNo.style.position = 'fixed';
+            btnNo.style.left = x + 'px';
+            btnNo.style.top = y + 'px';
+            btnNo.style.transform = 'none'; // Quitar el transform inicial
+
+            // Hacer más grande el botón SÍ
+            scaleFactor += 0.35; // Crece significativamente
+            btnYes.style.transform = `scale(${scaleFactor})`;
+            
+            // Vibración visual para llamar la atención
+            btnYes.animate([
+                { transform: `scale(${scaleFactor}) rotate(0deg)` },
+                { transform: `scale(${scaleFactor}) rotate(-3deg)` },
+                { transform: `scale(${scaleFactor}) rotate(3deg)` },
+                { transform: `scale(${scaleFactor}) rotate(0deg)` }
+            ], {
+                duration: 200,
+                iterations: 1
+            });
+        }
+
+        function acceptProposal() {
+            document.getElementById('proposal-screen').classList.add('hidden');
+            document.getElementById('final-screen').classList.remove('hidden');
+            
+            const bgMusic = document.getElementById('bg-music');
+            const winMusic = document.getElementById('win-music');
+            
+            bgMusic.pause();
+            bgMusic.currentTime = 0;
+            winMusic.volume = 0.7;
+            winMusic.play().catch(e => console.log("Audio error")); 
+
+            animateDinner();
+            spawnHearts();
+        }
+
+        // --- ANIMACIÓN CENA ROMÁNTICA (PERSONALIZADA) ---
+        let candleFrame = 0;
+
+        function animateDinner() {
+            const w = finalCanvas.width;
+            const h = finalCanvas.height;
+            
+            finalCtx.clearRect(0,0,w,h);
+
+            // Fondo (Ventana y Noche)
+            finalCtx.fillStyle = '#2d3436'; // Pared oscura
+            finalCtx.fillRect(0,0,w,h);
+            
+            const wx = w/2 - 120;
+            const wy = h/2 - 220; 
+            
+            // Cielo nocturno en la ventana
+            finalCtx.fillStyle = '#0a0a20'; 
+            finalCtx.fillRect(wx, wy, 240, 200);
+            
+            // Estrellas
+            if(Math.random() > 0.9) {
+                finalCtx.fillStyle = '#fff';
+                finalCtx.fillRect(wx + Math.random()*240, wy + Math.random()*200, 2, 2);
+            }
+            
+            // Luna llena
+            finalCtx.fillStyle = '#f1c40f';
+            finalCtx.beginPath();
+            finalCtx.arc(wx + 180, wy + 60, 25, 0, Math.PI*2);
+            finalCtx.fill();
+
+            // Marco ventana
+            finalCtx.strokeStyle = '#636e72';
+            finalCtx.lineWidth = 8;
+            finalCtx.strokeRect(wx, wy, 240, 200);
+            finalCtx.beginPath();
+            finalCtx.moveTo(wx + 120, wy);
+            finalCtx.lineTo(wx + 120, wy + 200);
+            finalCtx.moveTo(wx, wy + 100);
+            finalCtx.lineTo(wx + 240, wy + 100);
+            finalCtx.stroke();
+
+            // Mesa
+            const tableY = h - 180; 
+            finalCtx.fillStyle = '#c0392b'; // Mantel rojo elegante
+            finalCtx.fillRect(0, tableY, w, 180);
+            
+            // Vela central
+            const candleX = w/2;
+            const candleY = tableY + 20;
+            
+            finalCtx.fillStyle = '#eee';
+            finalCtx.fillRect(candleX - 10, candleY - 60, 20, 60);
+            
+            candleFrame++;
+            const flicker = Math.sin(candleFrame * 0.2) * 3;
+            const flameH = 25 + flicker;
+            
+            // Llama
+            finalCtx.fillStyle = '#e67e22'; 
+            finalCtx.beginPath();
+            finalCtx.ellipse(candleX, candleY - 60 - (flameH/2), 8, flameH/2, 0, 0, Math.PI*2);
+            finalCtx.fill();
+            finalCtx.fillStyle = '#f1c40f'; 
+            finalCtx.beginPath();
+            finalCtx.ellipse(candleX, candleY - 60 - (flameH/2) + 5, 4, flameH/3, 0, 0, Math.PI*2);
+            finalCtx.fill();
+            
+            // Halo de luz
+            const gradient = finalCtx.createRadialGradient(candleX, candleY - 70, 10, candleX, candleY - 70, 180);
+            gradient.addColorStop(0, 'rgba(255, 234, 167, 0.25)');
+            gradient.addColorStop(1, 'rgba(255, 234, 167, 0)');
+            finalCtx.fillStyle = gradient;
+            finalCtx.beginPath();
+            finalCtx.arc(candleX, candleY - 70, 180, 0, Math.PI*2);
+            finalCtx.fill();
+
+            // Copas
+            drawWineGlass(w/2 - 70, tableY + 40);
+            drawWineGlass(w/2 + 70, tableY + 40);
+
+            // --- DIBUJO DE LA PAREJA (KEVIN Y VERONICA) ---
+            // Basado en la foto: Él a la derecha (camisa clara), Ella a la izquierda (vestido negro)
+            
+            // Veronica (Izquierda)
+            drawPerson(w/2 - 130, tableY + 80, '#2c3e50', 'long', '#1a1a1a'); // Pelo oscuro, vestido negro
+            
+            // Kevin (Derecha)
+            drawPerson(w/2 + 130, tableY + 80, '#2c3e50', 'short', '#b2bec3'); // Pelo oscuro, camisa clara (menta/gris)
+
+            requestAnimationFrame(animateDinner);
+        }
+
+        function drawPerson(x, y, hairColor, hairStyle, clothesColor) {
+            // Cuerpo/Ropa
+            finalCtx.fillStyle = clothesColor;
+            finalCtx.beginPath();
+            finalCtx.ellipse(x, y + 40, 45, 55, 0, 0, Math.PI*2); // Torso
+            finalCtx.fill();
+
+            // Cabeza/Piel
+            finalCtx.fillStyle = '#f5cba7'; // Tono de piel
+            finalCtx.beginPath();
+            finalCtx.arc(x, y, 35, 0, Math.PI*2);
+            finalCtx.fill();
+
+            // Pelo
+            finalCtx.fillStyle = hairColor;
+            if (hairStyle === 'long') {
+                // Pelo largo de Veronica
+                finalCtx.beginPath();
+                finalCtx.arc(x, y, 38, Math.PI, Math.PI*2); // Parte superior
+                finalCtx.lineTo(x + 40, y + 60);
+                finalCtx.lineTo(x - 40, y + 60);
+                finalCtx.fill();
+            } else {
+                // Pelo corto de Kevin
+                finalCtx.beginPath();
+                finalCtx.arc(x, y - 5, 38, 0.8 * Math.PI, 2.2 * Math.PI);
+                finalCtx.fill();
+            }
+
+            // Sonrisa
+            finalCtx.strokeStyle = '#d35400';
+            finalCtx.lineWidth = 2;
+            finalCtx.beginPath();
+            finalCtx.arc(x, y + 10, 15, 0.2, Math.PI - 0.2);
+            finalCtx.stroke();
+        }
+
+        function drawWineGlass(x, y) {
+            // Tallo y base
+            finalCtx.fillStyle = 'rgba(255,255,255,0.3)';
+            finalCtx.strokeStyle = '#fff';
+            finalCtx.lineWidth = 1.5;
+            finalCtx.beginPath();
+            finalCtx.moveTo(x, y - 40);
+            finalCtx.lineTo(x, y);
+            finalCtx.stroke();
+            finalCtx.beginPath();
+            finalCtx.moveTo(x - 15, y);
+            finalCtx.lineTo(x + 15, y);
+            finalCtx.stroke();
+            
+            // Copa
+            finalCtx.beginPath();
+            finalCtx.moveTo(x - 20, y - 70);
+            finalCtx.bezierCurveTo(x - 20, y - 30, x + 20, y - 30, x + 20, y - 70);
+            finalCtx.stroke();
+            finalCtx.fill();
+            
+            // Vino
+            finalCtx.fillStyle = '#720e1e'; // Rojo intenso
+            finalCtx.beginPath();
+            finalCtx.moveTo(x - 18, y - 50);
+            finalCtx.bezierCurveTo(x - 18, y - 32, x + 18, y - 32, x + 18, y - 50);
+            finalCtx.fill();
+        }
+
+        function spawnHearts() {
+            setInterval(() => {
+                const h = document.createElement('div');
+                h.classList.add('heart-particle');
+                h.innerHTML = Math.random() > 0.6 ? '❤️' : (Math.random() > 0.5 ? '💖' : '✨');
+                h.style.left = Math.random() * 100 + 'vw';
+                h.style.top = '105vh';
+                document.body.appendChild(h);
+                setTimeout(() => h.remove(), 4000);
+            }, 300);
+        }
+
+    </script>
+</body>
+</html>
