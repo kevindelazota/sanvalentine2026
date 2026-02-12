@@ -15,6 +15,7 @@
             font-family: 'Quicksand', sans-serif;
             touch-action: none;
             user-select: none;
+            -webkit-user-select: none; /* Safari */
         }
 
         #game-container {
@@ -99,6 +100,8 @@
             transition: transform 0.2s, box-shadow 0.2s;
             -webkit-tap-highlight-color: transparent;
             margin: 5px;
+            z-index: 100; /* Asegurar que esté encima de todo */
+            position: relative;
         }
 
         .btn:active {
@@ -231,10 +234,10 @@
 <body>
 
     <!-- AUDIO -->
-    <audio id="bg-music" loop>
+    <audio id="bg-music" loop preload="auto">
         <source src="https://commondatastorage.googleapis.com/codeskulptor-assets/Epoq-Lepidoptera.ogg" type="audio/ogg">
     </audio>
-    <audio id="win-music">
+    <audio id="win-music" preload="auto">
         <source src="https://commondatastorage.googleapis.com/codeskulptor-assets/week7-brrring.m4a" type="audio/mp4"> 
     </audio>
 
@@ -246,6 +249,7 @@
             <p>Carbomci tiene una misión muy importante y necesita tu ayuda para completarla.</p>
             <p>¡El camino está lleno de peligros! ¿Podrás guiarlo a salvo?</p>
             <p style="font-size: 0.9rem; background: none; padding: 0;">(Toca la pantalla para saltar)</p>
+            <!-- Añadido ontouchstart para respuesta inmediata en algunos móviles -->
             <button class="btn" onclick="startGame()">¡Comenzar Misión!</button>
         </div>
 
@@ -756,12 +760,25 @@
             }
         }
 
-        // --- CONTROLES ---
+        // --- CONTROLES MÓVIL Y ESCRITORIO ---
         function jumpAction(e) {
-            if (e && e.type === 'touchstart') e.preventDefault(); 
+            // CRÍTICO PARA MÓVIL:
+            // Si el toque fue en un botón, NO hacer nada aquí (dejar que el botón funcione)
+            if (e && e.target) {
+                if (e.target.closest('button') || e.target.classList.contains('btn')) {
+                    return;
+                }
+            }
+
+            // Si es un toque en el canvas o cuerpo, prevenir zoom/scroll y saltar
+            if (e && e.type === 'touchstart') {
+                e.preventDefault(); 
+            }
+            
             if (gameState === 'PLAYING') dog.jump();
         }
 
+        // Usamos { passive: false } para poder usar preventDefault y evitar scroll
         window.addEventListener('touchstart', jumpAction, {passive: false});
         window.addEventListener('mousedown', jumpAction);
         window.addEventListener('keydown', (e) => {
@@ -771,15 +788,29 @@
         // --- FLUJO DEL JUEGO ---
 
         function startGame() {
+            // 1. Ocultar UI primero (Respuesta visual inmediata)
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('tap-hint').style.display = 'block';
-            // Intentar reproducir música con interacción del usuario
-            const bgMusic = document.getElementById('bg-music');
-            bgMusic.volume = 0.5;
-            bgMusic.play().catch(e => console.log("Audio play error:", e));
+
+            // 2. Iniciar lógica de juego (CRÍTICO: Hacerlo antes del audio)
             gameState = 'PLAYING';
             initGame();
             gameLoop();
+
+            // 3. Intentar reproducir audio (Si falla, el juego ya arrancó)
+            const bgMusic = document.getElementById('bg-music');
+            bgMusic.volume = 0.5;
+            
+            // Usar promesa para manejar errores de autoplay en móvil
+            const playPromise = bgMusic.play();
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    // Audio iniciado correctamente
+                })
+                .catch(error => {
+                    console.log("Audio autoplay prevenido por el navegador. El juego continuará sin música inicial.");
+                });
+            }
         }
 
         function gameOver() {
