@@ -16,6 +16,7 @@
             touch-action: none;
             user-select: none;
             -webkit-user-select: none; /* Safari */
+            -webkit-tap-highlight-color: transparent;
         }
 
         #game-container {
@@ -71,7 +72,7 @@
             font-family: 'Great Vibes', cursive;
             color: #ff4757;
             font-size: 2.8rem;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         p {
@@ -98,9 +99,8 @@
             box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
-            -webkit-tap-highlight-color: transparent;
             margin: 5px;
-            z-index: 100; /* Asegurar que esté encima de todo */
+            z-index: 100;
             position: relative;
         }
 
@@ -109,7 +109,6 @@
             box-shadow: 0 2px 10px rgba(255, 71, 87, 0.4);
         }
         
-        /* Botones especiales IA */
         .btn-ai {
             background: linear-gradient(45deg, #a55eea, #4b7bec);
             border: 2px solid rgba(255,255,255,0.5);
@@ -117,32 +116,30 @@
 
         /* --- UI DE LA PROPUESTA --- */
         .buttons-container {
-            display: flex;
-            gap: 30px; /* Más espacio entre botones */
-            margin-top: 30px;
             position: relative;
             width: 100%;
-            height: 200px; /* Altura suficiente para que el NO se mueva inicialmente */
+            height: 300px; /* Área amplia para movimiento */
+            display: flex;
             justify-content: center;
-            align-items: flex-start;
+            align-items: center; /* Centrar el SÍ */
         }
 
         #btn-yes {
             background: linear-gradient(45deg, #2ed573, #7bed9f);
-            z-index: 100;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            font-size: 1.3rem; /* Un poco más grande de base */
-            padding: 18px 40px;
+            z-index: 50; /* Z-index menor que el NO */
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-size: 1.4rem;
+            padding: 20px 45px;
+            position: absolute; /* Fijo en el centro relativo */
         }
 
         #btn-no {
             background: linear-gradient(45deg, #ff4757, #ff6b81);
-            position: absolute; /* Posición absoluta inicial */
-            top: 0;
-            left: 50%; /* Centrado inicialmente */
-            transform: translateX(60px); /* Desplazado a la derecha del SÍ */
-            transition: top 0.3s, left 0.3s;
-            z-index: 101; /* Asegurar que se vea y se pueda intentar clickear */
+            position: absolute; 
+            z-index: 100;
+            /* Posición inicial al lado del sí */
+            transform: translateX(100px); 
+            transition: top 0.2s ease-out, left 0.2s ease-out; /* Movimiento rápido pero suave */
         }
 
         /* --- MENSAJE DE GAME OVER --- */
@@ -151,14 +148,16 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.9);
-            padding: 20px 40px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px 40px;
             border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
             text-align: center;
             display: none;
             z-index: 30;
-            border: 2px solid #ff6b81;
+            border: 3px solid #ff6b81;
+            width: 80%;
+            max-width: 300px;
         }
 
         /* --- ELEMENTOS DECORATIVOS --- */
@@ -166,7 +165,7 @@
             position: absolute;
             font-size: 24px;
             pointer-events: none;
-            animation: floatUp 3s linear forwards;
+            animation: floatUp 4s linear forwards;
             z-index: 50;
         }
 
@@ -175,18 +174,18 @@
             100% { transform: translateY(-100vh) scale(1.5); opacity: 0; }
         }
 
-        /* Indicador de salto para móvil */
         #tap-hint {
             position: absolute;
             bottom: 20px;
             width: 100%;
             text-align: center;
-            color: rgba(102, 77, 85, 0.6);
-            font-size: 0.9rem;
-            animation: pulse 2s infinite;
+            color: rgba(102, 77, 85, 0.8);
+            font-size: 1.1rem;
+            font-weight: bold;
+            animation: pulse 1.5s infinite;
             pointer-events: none;
         }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 0.7; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 0.7; } }
 
         /* --- UI DEL FINAL (IA) --- */
         #ai-container {
@@ -202,12 +201,12 @@
         }
         
         #ai-result-box {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
             padding: 15px;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             min-height: 50px;
-            max-height: 150px;
+            max-height: 120px;
             overflow-y: auto;
             border: 2px solid #ffd700;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
@@ -216,6 +215,17 @@
             display: none;
             font-size: 0.95rem;
             width: 100%;
+        }
+        
+        #final-message {
+            margin-top: 10px;
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            border: 1px solid rgba(255,255,255,0.3);
         }
 
         .loading-dots:after {
@@ -249,32 +259,31 @@
             <p>Carbomci tiene una misión muy importante y necesita tu ayuda para completarla.</p>
             <p>¡El camino está lleno de peligros! ¿Podrás guiarlo a salvo?</p>
             <p style="font-size: 0.9rem; background: none; padding: 0;">(Toca la pantalla para saltar)</p>
-            <!-- Añadido ontouchstart para respuesta inmediata en algunos móviles -->
             <button class="btn" onclick="startGame()">¡Comenzar Misión!</button>
         </div>
 
         <!-- CANVAS DEL JUEGO -->
         <canvas id="gameCanvas"></canvas>
-        <div id="tap-hint" style="display:none;">Toca para saltar</div>
+        <div id="tap-hint" style="display:none;">¡TOCA PARA SALTAR!</div>
 
         <!-- OVERLAY DE GAME OVER -->
         <div id="game-over-overlay">
             <h3 style="color: #ff4757; margin: 0 0 10px 0;">¡Oh no! 🥺</h3>
-            <p style="margin: 0 0 15px 0; font-size: 1rem;">Carbomci chocó. ¡Pero no se rinde!</p>
+            <p style="margin: 0 0 15px 0; font-size: 1rem;">Carbomci chocó con un obstáculo.</p>
             <button class="btn" style="padding: 10px 30px; font-size: 1rem;" onclick="resetGame()">Intentar de nuevo</button>
         </div>
 
         <!-- PANTALLA 2: LA PROPUESTA -->
         <div id="proposal-screen" class="screen hidden">
             <h1>¡Lo lograste! 🎉</h1>
-            <p>Gracias a ti, Carbomci llegó sano y salvo a su destino. Y ahora, él tiene una pregunta muy especial para ti...</p>
+            <p>Gracias a ti, Carbomci llegó sano y salvo a casa. Y ahora, él tiene una pregunta muy especial para ti...</p>
             <h2>¿Quieres ser mi San Valentín?</h2>
             
             <div class="buttons-container">
-                <!-- Botón SÍ centrado y grande -->
+                <!-- Botón SÍ -->
                 <button id="btn-yes" class="btn" onclick="acceptProposal()">¡SÍ, ME ENCANTARÍA! 😍</button>
-                <!-- Botón NO posicionado absolutamente a su lado -->
-                <button id="btn-no" class="btn" onmouseover="moveNo()" onclick="moveNo()">Mmm... no sé 🤔</button>
+                <!-- Botón NO -->
+                <button id="btn-no" class="btn">Mmm... no sé 🤔</button>
             </div>
         </div>
 
@@ -282,20 +291,26 @@
         <div id="final-screen" class="screen hidden" style="padding: 0; background: #1e1e2e;">
             <canvas id="finalCanvas"></canvas>
             
-            <div style="position: absolute; top: 5%; width: 100%; text-align: center; z-index: 30;">
-                <h1 style="color: #fff; font-size: 2.8rem; text-shadow: 0 0 10px #ff6b81;">¡Feliz San Valentín!</h1>
+            <div style="position: absolute; top: 4%; width: 100%; text-align: center; z-index: 30;">
+                <h1 style="color: #fff; font-size: 2.5rem; text-shadow: 0 0 10px #ff6b81; margin-bottom: 5px;">¡Feliz San Valentín!</h1>
             </div>
 
             <!-- UI FLOTANTE PARA IA -->
             <div id="ai-container">
+                
+                <div id="final-message">
+                    Me encanta como eres y me encanta estar contigo, porque este sea nuestro primer San Valentín de muchos.<br>
+                    <strong>Te quiero como no tienes idea ❤️</strong>
+                </div>
+
                 <div id="ai-result-box"></div>
                 
-                <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 10px;">
                     <button class="btn btn-ai" onclick="generateLoveLetter()">
-                        ✨ Carta Mágica de Kevin
+                        ✨ Carta Mágica
                     </button>
                     <button class="btn btn-ai" style="background: linear-gradient(45deg, #f0932b, #ffbe76);" onclick="generateDogThought()">
-                        🐾 ¿Qué piensa Carbomci?
+                        🐾 Carbomci opina
                     </button>
                 </div>
             </div>
@@ -311,7 +326,7 @@
             const displayBox = document.getElementById('ai-result-box');
             displayBox.style.display = 'block';
             displayBox.innerHTML = 'Conectando con las estrellas<span class="loading-dots"></span>';
-            displayBox.scrollTop = 0; // Scroll al inicio
+            displayBox.scrollTop = 0; 
             
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
             
@@ -346,22 +361,20 @@
         }
 
         async function generateLoveLetter() {
-            const prompt = "Escribe una carta de amor muy breve (máximo 35 palabras), romántica, sincera y un poco divertida para Veronica de parte de Kevin. Estamos en una cena de San Valentín con vino. Menciona lo guapa que está y a nuestro perrito Carbomci. Tono: Profundamente enamorado.";
+            const prompt = "Escribe una carta de amor muy breve (máximo 30 palabras), romántica y graciosa para Veronica de parte de Kevin. Estamos cenando en San Valentín. Menciona lo guapa que está hoy y a nuestro perro Carbomci.";
             const text = await callGemini(prompt);
-            
             const displayBox = document.getElementById('ai-result-box');
-            displayBox.innerHTML = `<strong>💌 De Kevin para Veronica:</strong><br>"${text}"`;
+            displayBox.innerHTML = `<strong>💌 De Kevin:</strong><br>"${text}"`;
         }
 
         async function generateDogThought() {
-            const prompt = "Actúa como un perrito grifón de Bruselas negro y barbudo llamado Carbomci. Di una frase corta (máximo 20 palabras) graciosa y tierna sobre mis dueños Veronica y Kevin en su cena de San Valentín. Quizás pensando en que me den comida, en lo cursis que son, o en que yo soy el verdadero regalo.";
+            const prompt = "Actúa como Carbomci, un perrito negro y barbudo. Di una frase corta (máximo 20 palabras) pidiendo comida de la mesa o comentando lo cursis que son mis dueños Veronica y Kevin hoy.";
             const text = await callGemini(prompt);
-            
             const displayBox = document.getElementById('ai-result-box');
             displayBox.innerHTML = `<strong>🐶 Carbomci piensa:</strong><br>"${text}"`;
         }
 
-        // --- CONFIGURACIÓN E INICIALIZACIÓN JUEGO ---
+        // --- CONFIGURACIÓN JUEGO ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const finalCanvas = document.getElementById('finalCanvas');
@@ -380,138 +393,112 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // Estados del Juego
+        // Estados
         let gameState = 'START'; 
         let frame = 0;
-        let gameSpeed = 6; // Un poco más rápido
+        let gameSpeed = 6; 
         let score = 0;
-        const targetScore = 1500; // Un poco más largo
+        const targetScore = 2000;
 
-        // --- ASSETS GENERADOS POR CÓDIGO ---
-        
-        // --- CARBOMCI (REDIBUJADO REALISTA/TIERNO) ---
+        // --- CARBOMCI ---
         const dog = {
             x: 50,
             y: 0,
             width: 55, 
             height: 50,
             vy: 0,
-            gravity: 0.7,
-            jumpPower: -13, // Salto más potente
+            gravity: 0.85, 
+            jumpPower: -15, 
             isJumping: false,
             groundY: 0,
             
             draw: function() {
                 const x = this.x;
                 const y = this.y;
-                const furColor = '#1a1a1a'; // Negro intenso
-                const muzzleColor = '#2d2d2d'; // Un poco más claro para el hocico
+                const furColor = '#1a1a1a'; 
+                const muzzleColor = '#2d2d2d'; 
                 
-                // Cuerpo (Más peludo y compacto)
+                // Cuerpo
                 ctx.fillStyle = furColor;
                 ctx.beginPath();
-                // Usamos varios círculos para simular pelo
-                ctx.arc(x + 30, y + 30, 20, 0, Math.PI * 2); // Centro
-                ctx.arc(x + 15, y + 35, 15, 0, Math.PI * 2); // Trasero
-                ctx.arc(x + 45, y + 25, 18, 0, Math.PI * 2); // Pecho
+                ctx.arc(x + 30, y + 30, 20, 0, Math.PI * 2); 
+                ctx.arc(x + 15, y + 35, 15, 0, Math.PI * 2); 
+                ctx.arc(x + 45, y + 25, 18, 0, Math.PI * 2); 
                 ctx.fill();
 
-                // Cabeza (Redonda y con barba)
+                // Cabeza
                 ctx.beginPath();
                 ctx.arc(x + 45, y + 15, 20, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Barba y Cejas características (Pelos desordenados)
+                // Barba y Cejas Despeinadas
                 ctx.strokeStyle = furColor;
                 ctx.lineWidth = 2;
                 ctx.beginPath();
-                // Barba
                 for(let i=0; i<10; i++) {
-                    let randX = (Math.random() - 0.5) * 20;
-                    let randY = Math.random() * 10;
-                    ctx.moveTo(x + 45 + randX, y + 25);
-                    ctx.lineTo(x + 45 + randX + (Math.random()-0.5)*5, y + 35 + randY);
-                }
-                // Cejas
-                 for(let i=0; i<6; i++) {
-                    let randX = (Math.random() - 0.5) * 15;
-                    ctx.moveTo(x + 45 + randX, y + 5);
-                    ctx.lineTo(x + 45 + randX + (Math.random()-0.5)*5, y - 5);
+                    let randX = (Math.sin(i*30 + frame*0.1)) * 5;
+                    ctx.moveTo(x + 40 + i*2, y + 25);
+                    ctx.lineTo(x + 40 + i*2 + randX, y + 35);
                 }
                 ctx.stroke();
 
-
-                // Orejas (Pequeñas y caídas)
+                // Orejas caídas
                 ctx.fillStyle = furColor;
                 ctx.beginPath();
-                ctx.ellipse(x + 28, y + 8, 8, 12, 0.8, 0, Math.PI * 2); // Izq
+                ctx.ellipse(x + 28, y + 8, 8, 12, 0.8, 0, Math.PI * 2); 
                 ctx.fill();
                 ctx.beginPath();
-                ctx.ellipse(x + 62, y + 8, 8, 12, -0.8, 0, Math.PI * 2); // Der
+                ctx.ellipse(x + 62, y + 8, 8, 12, -0.8, 0, Math.PI * 2); 
                 ctx.fill();
 
-                // Hocico (Chato)
+                // Hocico Chato
                 ctx.fillStyle = muzzleColor;
                 ctx.beginPath();
                 ctx.ellipse(x + 45, y + 20, 10, 7, 0, 0, Math.PI * 2);
                 ctx.fill();
-                // Nariz
                 ctx.fillStyle = '#000';
                 ctx.beginPath();
                 ctx.arc(x + 45, y + 18, 3.5, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Ojos (Grandes, redondos y expresivos)
+                // Ojos
                 const eyeY = y + 12;
                 ctx.fillStyle = '#fff';
-                ctx.beginPath();
-                ctx.arc(x + 36, eyeY, 5, 0, Math.PI * 2); // Izq
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(x + 54, eyeY, 5, 0, Math.PI * 2); // Der
-                ctx.fill();
-                // Pupilas grandes
-                ctx.fillStyle = '#3e2723'; // Marrón muy oscuro
-                ctx.beginPath();
-                ctx.arc(x + 36, eyeY, 3.5, 0, Math.PI * 2);
+                ctx.beginPath(); ctx.arc(x + 36, eyeY, 5, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(x + 54, eyeY, 5, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#3e2723'; 
+                ctx.beginPath(); ctx.arc(x + 36, eyeY, 3.5, 0, Math.PI * 2);
                 ctx.arc(x + 54, eyeY, 3.5, 0, Math.PI * 2);
                 ctx.fill();
-                // Brillo
-                ctx.fillStyle = '#fff';
-                ctx.beginPath();
-                ctx.arc(x + 34, eyeY - 1.5, 1.5, 0, Math.PI * 2);
+                ctx.fillStyle = '#fff'; // Brillo
+                ctx.beginPath(); ctx.arc(x + 34, eyeY - 1.5, 1.5, 0, Math.PI * 2);
                 ctx.arc(x + 52, eyeY - 1.5, 1.5, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Collar Rojo
+                // Collar
                 ctx.strokeStyle = '#d63031';
                 ctx.lineWidth = 4;
                 ctx.beginPath();
                 ctx.arc(x + 45, y + 28, 15, 0.3, Math.PI - 0.3);
                 ctx.stroke();
-                // Plaquita
                 ctx.fillStyle = '#fdcb6e';
-                ctx.beginPath();
-                ctx.arc(x + 45, y + 40, 4, 0, Math.PI*2);
-                ctx.fill();
+                ctx.beginPath(); ctx.arc(x + 45, y + 40, 4, 0, Math.PI*2); ctx.fill();
 
-                // Patitas (Animadas)
+                // Patitas rápidas
                 ctx.fillStyle = furColor;
-                const legAnim = Math.sin(frame * 0.4) * 6;
-                // Traseras
+                const legAnim = Math.sin(frame * 0.8) * 8; 
                 ctx.beginPath(); ctx.arc(x + 20, y + 48 + legAnim, 7, 0, Math.PI*2); ctx.fill();
                 ctx.beginPath(); ctx.arc(x + 30, y + 48 - legAnim, 7, 0, Math.PI*2); ctx.fill();
-                // Delanteras
                 ctx.beginPath(); ctx.arc(x + 50, y + 45 + legAnim, 7, 0, Math.PI*2); ctx.fill();
                 ctx.beginPath(); ctx.arc(x + 60, y + 45 - legAnim, 7, 0, Math.PI*2); ctx.fill();
 
-                // Cola (Pequeña y rápida)
+                // Cola
                 ctx.strokeStyle = furColor;
                 ctx.lineWidth = 5;
                 ctx.lineCap = 'round';
                 ctx.beginPath();
                 ctx.moveTo(x + 15, y + 30);
-                let tailWag = Math.sin(frame * 0.8) * 5;
+                let tailWag = Math.sin(frame * 1.5) * 6;
                 ctx.lineTo(x + 5, y + 20 + tailWag);
                 ctx.stroke();
             },
@@ -535,73 +522,80 @@
             }
         };
 
-        // --- OBSTÁCULOS VARIADOS ---
+        // --- OBSTÁCULOS ---
         let obstacles = [];
         let clouds = [];
         let house = null;
 
-        // Clase base para obstáculos
         class Obstacle {
             constructor(type) {
                 this.x = canvasWidth;
                 this.type = type;
                 this.markedForDeletion = false;
-                this.w = 40;
-                this.h = 40;
-                // Configuración según tipo
+                
+                // Configuración de dificultad
+                // AJUSTADO: Todos los obstáculos se alinean con el suelo (groundY)
                 if (type === 'spike') {
-                    this.y = dog.groundY - 20;
-                    this.w = 50; this.h = 20;
+                    this.w = 50; this.h = 25;
+                    this.y = dog.groundY - this.h;
                 } else if (type === 'rock') {
-                    this.y = dog.groundY - 35;
-                    this.w = 40; this.h = 35;
-                } else if (type === 'bigDog') {
-                    this.y = dog.groundY - 50;
-                    this.w = 70; this.h = 50;
+                    this.w = 40; this.h = 40;
+                    this.y = dog.groundY - this.h;
+                } else if (type === 'enemyDog') {
+                    this.w = 60; this.h = 50;
+                    this.y = dog.groundY - this.h; 
                 }
             }
             draw() {
                 const x = this.x; const y = this.y; const w = this.w; const h = this.h;
+                
+                // Sombra para evitar que floten
+                ctx.fillStyle = 'rgba(0,0,0,0.2)';
+                ctx.beginPath(); ctx.ellipse(x + w/2, dog.groundY, w/2, 5, 0, 0, Math.PI*2); ctx.fill();
+
                 if (this.type === 'spike') {
-                    // Pinchos
-                    ctx.fillStyle = '#95a5a6';
-                    ctx.beginPath();
-                    ctx.moveTo(x, y + h);
-                    ctx.lineTo(x + w/4, y);
-                    ctx.lineTo(x + w/2, y + h);
-                    ctx.lineTo(x + 3*w/4, y);
-                    ctx.lineTo(x + w, y + h);
-                    ctx.fill();
-                } else if (this.type === 'rock') {
-                    // Roca
                     ctx.fillStyle = '#7f8c8d';
                     ctx.beginPath();
-                    ctx.moveTo(x + 10, y + h);
-                    ctx.lineTo(x, y + h - 10);
-                    ctx.lineTo(x + 10, y);
-                    ctx.lineTo(x + w - 10, y + 5);
-                    ctx.lineTo(x + w, y + h - 5);
-                    ctx.lineTo(x + w - 15, y + h);
+                    ctx.moveTo(x, y + h); ctx.lineTo(x + w/3, y); ctx.lineTo(x + 2*w/3, y + h);
+                    ctx.moveTo(x + w/3, y + h); ctx.lineTo(x + 2*w/3, y); ctx.lineTo(x + w, y + h);
                     ctx.fill();
-                } else if (this.type === 'bigDog') {
-                    // Perro grande dormido (Bulldog marrón)
-                    ctx.fillStyle = '#8d6e63'; // Cuerpo
+                } else if (this.type === 'rock') {
+                    ctx.fillStyle = '#95a5a6';
                     ctx.beginPath();
-                    ctx.ellipse(x + w/2, y + h/2 + 5, w/2, h/3, 0, 0, Math.PI*2);
+                    ctx.moveTo(x, y+h); ctx.lineTo(x+10, y+10); ctx.lineTo(x+w-10, y); ctx.lineTo(x+w, y+h);
                     ctx.fill();
-                    // Cabeza
+                } else if (this.type === 'enemyDog') {
+                    const bodyColor = '#3d3d3d'; // Gris oscuro/negro
+                    
+                    // PERRO GUARDIÁN (Rediseñado - Perfil cuadrado)
+                    // Patas
+                    ctx.fillStyle = bodyColor;
+                    const legAnim = Math.sin(frame * 0.5) * 5;
+                    ctx.fillRect(x + 5, y + 30 + legAnim, 8, 20); // Pata trasera
+                    ctx.fillRect(x + 45, y + 30 - legAnim, 8, 20); // Pata delantera
+                    
+                    // Cuerpo (Rectángulo redondeado)
                     ctx.beginPath();
-                    ctx.arc(x + w/4, y + h/2, h/2.5, 0, Math.PI*2);
+                    ctx.roundRect(x, y + 15, w, 25, 5);
                     ctx.fill();
-                    // Oreja caída
-                    ctx.fillStyle = '#6d4c41';
+
+                    // Cabeza (Cuadrada con orejas)
+                    ctx.fillRect(x - 5, y, 25, 25);
+                    
+                    // Orejas puntiagudas (Doberman style)
                     ctx.beginPath();
-                    ctx.ellipse(x + w/4 - 10, y + h/3, 8, 12, 0.5, 0, Math.PI*2);
+                    ctx.moveTo(x, y); ctx.lineTo(x+5, y-10); ctx.lineTo(x+10, y); // Oreja 1
+                    ctx.moveTo(x+12, y); ctx.lineTo(x+17, y-10); ctx.lineTo(x+22, y); // Oreja 2
                     ctx.fill();
-                    // Morro y "Zzz"
-                    ctx.fillStyle = '#fff';
-                    ctx.font = "16px Arial";
-                    ctx.fillText("Zzz...", x + w - 20, y);
+
+                    // Ojo rojo
+                    ctx.fillStyle = '#e74c3c';
+                    ctx.beginPath(); ctx.arc(x + 5, y + 10, 2, 0, Math.PI*2); ctx.fill();
+
+                    // Collar de pinchos
+                    ctx.strokeStyle = '#bdc3c7';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath(); ctx.moveTo(x + 18, y + 18); ctx.lineTo(x + 18, y + 35); ctx.stroke();
                 }
             }
             update() {
@@ -613,70 +607,37 @@
         class House {
             constructor() {
                 this.x = canvasWidth;
-                this.y = dog.groundY - 120;
-                this.w = 140;
-                this.h = 120;
+                this.y = dog.groundY - 140;
+                this.w = 160;
+                this.h = 140;
             }
             draw() {
-                const x = this.x;
-                const y = this.y;
-                
-                ctx.fillStyle = '#fce4ec'; // Paredes
-                ctx.fillRect(x, y + 40, 120, 80);
-                
-                ctx.fillStyle = '#ff7675'; // Techo
-                ctx.beginPath();
-                ctx.moveTo(x - 10, y + 40);
-                ctx.lineTo(x + 60, y - 10);
-                ctx.lineTo(x + 130, y + 40);
-                ctx.fill();
-                
-                ctx.fillStyle = '#6d4c41'; // Puerta
-                ctx.fillRect(x + 45, y + 70, 30, 50);
-                ctx.fillStyle = '#ffd700'; // Pomo
-                ctx.beginPath();
-                ctx.arc(x + 70, y + 95, 3, 0, Math.PI*2);
-                ctx.fill();
+                const x = this.x; const y = this.y;
+                // Sombra casa
+                ctx.fillStyle = 'rgba(0,0,0,0.2)';
+                ctx.beginPath(); ctx.ellipse(x + 80, dog.groundY, 70, 10, 0, 0, Math.PI*2); ctx.fill();
 
-                // Ventana
-                ctx.fillStyle = '#b2bec3';
-                ctx.fillRect(x + 10, y + 60, 25, 25);
-                ctx.strokeStyle = '#dfe6e9';
-                ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.moveTo(x+22.5, y+60); ctx.lineTo(x+22.5, y+85); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(x+10, y+72.5); ctx.lineTo(x+35, y+72.5); ctx.stroke();
-
-                ctx.fillStyle = '#555';
-                ctx.font = "16px Quicksand";
-                ctx.fillText("Hogar Dulce Hogar", x + 15, y + 25);
+                ctx.fillStyle = '#fce4ec'; ctx.fillRect(x, y + 50, 140, 90);
+                ctx.fillStyle = '#ff7675'; 
+                ctx.beginPath(); ctx.moveTo(x - 10, y + 50); ctx.lineTo(x + 70, y); ctx.lineTo(x + 150, y + 50); ctx.fill();
+                ctx.fillStyle = '#6d4c41'; ctx.fillRect(x + 55, y + 80, 40, 60);
+                ctx.fillStyle = '#ffd700'; ctx.beginPath(); ctx.arc(x + 85, y + 110, 3, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#555'; ctx.font = "18px Quicksand"; ctx.fillText("CASA", x + 55, y + 40);
             }
-            update() {
-                this.x -= gameSpeed;
-            }
+            update() { this.x -= gameSpeed; }
         }
 
-        // --- LÓGICA DEL JUEGO ---
-
+        // --- LÓGICA DE JUEGO ---
         function initGame() {
-            frame = 0;
-            score = 0;
-            gameSpeed = 6; 
-            obstacles = [];
-            house = null;
-            dog.x = 50;
-            dog.vy = 0;
+            frame = 0; score = 0; gameSpeed = 6; 
+            obstacles = []; house = null;
+            dog.x = 50; dog.vy = 0;
         }
 
         function checkCollision(rect1, rect2) {
-            // Hitbox del perro un poco más pequeña que el dibujo para ser justos
-            const dogBox = {
-                x: rect1.x + 15, y: rect1.y + 15,
-                w: rect1.width - 30, h: rect1.height - 20
-            };
-            return (dogBox.x < rect2.x + rect2.w &&
-                    dogBox.x + dogBox.w > rect2.x &&
-                    dogBox.y < rect2.y + rect2.h &&
-                    dogBox.y + dogBox.h > rect2.y);
+            const dogBox = { x: rect1.x + 20, y: rect1.y + 20, w: rect1.width - 40, h: rect1.height - 25 };
+            return (dogBox.x < rect2.x + rect2.w && dogBox.x + dogBox.w > rect2.x &&
+                    dogBox.y < rect2.y + rect2.h && dogBox.y + dogBox.h > rect2.y);
         }
 
         function gameLoop() {
@@ -684,47 +645,47 @@
 
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-            ctx.fillStyle = '#81ecec'; // Cielo
-            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            // Fondo Cielo
+            ctx.fillStyle = '#81ecec'; ctx.fillRect(0, 0, canvasWidth, canvasHeight);
             
+            // Suelo (Menta Suave + Patrón de Bloques)
             dog.groundY = canvasHeight - 100;
-            ctx.fillStyle = '#55efc4'; // Suelo
+            ctx.fillStyle = '#a8e6cf'; // Base menta suave
             ctx.fillRect(0, dog.groundY, canvasWidth, 100);
             
-            // Patrón del suelo
-            ctx.fillStyle = '#00b894';
-            for (let i = 0; i < canvasWidth; i += 40) {
-                if ((i + frame * gameSpeed) % 80 < 40) {
-                    ctx.fillRect((i - (frame * gameSpeed) % 40), dog.groundY, 40, 10);
+            // Patrón de "Velocidad" (Bloques de pasto más oscuro - Estilo Clásico)
+            ctx.fillStyle = '#88d8b0'; // Menta un poco más oscuro
+            let offset = (frame * gameSpeed) % 80;
+            for (let i = -80; i < canvasWidth + 80; i += 40) {
+                // Dibujar bloques alternados para efecto de velocidad sin marear
+                if ((i + offset) % 80 < 40) {
+                    ctx.fillRect(i - offset, dog.groundY, 40, 100); 
                 }
             }
+            
+            // Borde superior del pasto
+            ctx.fillStyle = '#55efc4';
+            ctx.fillRect(0, dog.groundY, canvasWidth, 10);
+
 
             // Nubes
-            if (frame % 100 === 0) {
-                clouds.push({x: canvasWidth, y: Math.random() * (canvasHeight/3), s: Math.random() * 1 + 0.5});
-            }
+            if (frame % 80 === 0) clouds.push({x: canvasWidth, y: Math.random()*(canvasHeight/3), s: Math.random()*2+1});
             clouds.forEach((c, i) => {
                 c.x -= c.s;
                 ctx.fillStyle = 'rgba(255,255,255,0.8)';
-                ctx.beginPath();
-                ctx.arc(c.x, c.y, 20, 0, Math.PI*2);
-                ctx.arc(c.x+15, c.y-10, 25, 0, Math.PI*2);
-                ctx.arc(c.x+30, c.y, 20, 0, Math.PI*2);
-                ctx.fill();
+                ctx.beginPath(); ctx.arc(c.x, c.y, 25, 0, Math.PI*2); ctx.arc(c.x+20, c.y-10, 30, 0, Math.PI*2); ctx.arc(c.x+40, c.y, 25, 0, Math.PI*2); ctx.fill();
                 if (c.x < -100) clouds.splice(i, 1);
             });
 
             if (gameState === 'PLAYING') {
                 score++;
-                // Generar Obstáculos Aleatorios
                 if (score < targetScore - 400) { 
-                    // Frecuencia de aparición variable
-                    let spawnRate = Math.max(60, 150 - Math.floor(score/10));
+                    let spawnRate = Math.max(90, 150 - Math.floor(score/20)); 
                     if (frame % spawnRate === 0) {
                         const rand = Math.random();
                         let type = 'rock';
-                        if (rand < 0.33) type = 'spike';
-                        else if (rand < 0.66) type = 'bigDog';
+                        if (rand < 0.3) type = 'spike';
+                        else if (rand < 0.6) type = 'enemyDog'; 
                         obstacles.push(new Obstacle(type));
                     }
                 } else if (score >= targetScore && !house) {
@@ -733,84 +694,42 @@
             }
 
             obstacles.forEach((ob, index) => {
-                ob.update();
-                ob.draw();
-
-                if (checkCollision(dog, ob)) {
-                    gameOver();
-                }
-                
+                ob.update(); ob.draw();
+                if (checkCollision(dog, ob)) gameOver();
                 if (ob.markedForDeletion) obstacles.splice(index, 1);
             });
 
             if (house) {
-                house.update();
-                house.draw();
-                if (dog.x > house.x + 50) {
-                    arrivedHome();
-                }
+                house.update(); house.draw();
+                if (dog.x > house.x + 60) arrivedHome();
             }
 
-            dog.update();
-            dog.draw();
-
+            dog.update(); dog.draw();
             frame++;
-            if (gameState === 'PLAYING' || gameState === 'ARRIVED') {
-                requestAnimationFrame(gameLoop);
-            }
+            if (gameState === 'PLAYING' || gameState === 'ARRIVED') requestAnimationFrame(gameLoop);
         }
 
-        // --- CONTROLES MÓVIL Y ESCRITORIO ---
+        // --- CONTROLES ---
         function jumpAction(e) {
-            // CRÍTICO PARA MÓVIL:
-            // Si el toque fue en un botón, NO hacer nada aquí (dejar que el botón funcione)
-            if (e && e.target) {
-                if (e.target.closest('button') || e.target.classList.contains('btn')) {
-                    return;
-                }
-            }
-
-            // Si es un toque en el canvas o cuerpo, prevenir zoom/scroll y saltar
-            if (e && e.type === 'touchstart') {
-                e.preventDefault(); 
-            }
-            
+            if (e && e.target && (e.target.closest('button') || e.target.classList.contains('btn'))) return;
+            if (e && e.type === 'touchstart') e.preventDefault(); 
             if (gameState === 'PLAYING') dog.jump();
         }
-
-        // Usamos { passive: false } para poder usar preventDefault y evitar scroll
         window.addEventListener('touchstart', jumpAction, {passive: false});
         window.addEventListener('mousedown', jumpAction);
-        window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' || e.code === 'ArrowUp') jumpAction();
-        });
+        window.addEventListener('keydown', (e) => { if (e.code === 'Space' || e.code === 'ArrowUp') jumpAction(); });
 
-        // --- FLUJO DEL JUEGO ---
-
+        // --- GAME STATES ---
         function startGame() {
-            // 1. Ocultar UI primero (Respuesta visual inmediata)
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('tap-hint').style.display = 'block';
-
-            // 2. Iniciar lógica de juego (CRÍTICO: Hacerlo antes del audio)
             gameState = 'PLAYING';
             initGame();
             gameLoop();
-
-            // 3. Intentar reproducir audio (Si falla, el juego ya arrancó)
+            
             const bgMusic = document.getElementById('bg-music');
             bgMusic.volume = 0.5;
-            
-            // Usar promesa para manejar errores de autoplay en móvil
-            const playPromise = bgMusic.play();
-            if (playPromise !== undefined) {
-                playPromise.then(_ => {
-                    // Audio iniciado correctamente
-                })
-                .catch(error => {
-                    console.log("Audio autoplay prevenido por el navegador. El juego continuará sin música inicial.");
-                });
-            }
+            bgMusic.play().catch(() => console.log("Audio autoplay prevented"));
         }
 
         function gameOver() {
@@ -826,63 +745,69 @@
         }
 
         function arrivedHome() {
-            gameState = 'ARRIVED'; 
-            gameSpeed = 0; 
-            
+            gameState = 'ARRIVED'; gameSpeed = 0; 
             setTimeout(() => {
                 const canvasEl = document.getElementById('gameCanvas');
                 canvasEl.style.transition = "opacity 1s";
                 canvasEl.style.opacity = "0";
                 document.getElementById('tap-hint').style.display = 'none';
-                
                 setTimeout(() => {
                     canvasEl.style.display = 'none';
                     document.getElementById('proposal-screen').classList.remove('hidden');
-                    // Asegurar que el botón NO esté en su posición inicial
-                    const btnNo = document.getElementById('btn-no');
-                    btnNo.style.position = 'absolute';
-                    btnNo.style.top = '0';
-                    btnNo.style.left = '50%';
-                    btnNo.style.transform = 'translateX(60px)';
+                    resetNoButton();
                 }, 1000);
-            }, 1000);
+            }, 800);
         }
 
-        // --- LÓGICA DE PROPUESTA (BOTÓN NO ESCURRIDIZO) ---
+        // --- LÓGICA BOTÓN "NO" ---
         const btnNo = document.getElementById('btn-no');
         const btnYes = document.getElementById('btn-yes');
         let scaleFactor = 1;
-        
-        function moveNo() {
-            // Calcular nueva posición aleatoria segura dentro de la pantalla
-            const padding = 20;
-            const maxX = window.innerWidth - btnNo.offsetWidth - padding;
-            const maxY = window.innerHeight - btnNo.offsetHeight - padding;
-            
-            const x = Math.max(padding, Math.random() * maxX);
-            const y = Math.max(padding, Math.random() * maxY);
-            
-            // Cambiar a fixed para movimiento libre por toda la pantalla
-            btnNo.style.position = 'fixed';
-            btnNo.style.left = x + 'px';
-            btnNo.style.top = y + 'px';
-            btnNo.style.transform = 'none'; // Quitar el transform inicial
 
-            // Hacer más grande el botón SÍ
-            scaleFactor += 0.35; // Crece significativamente
-            btnYes.style.transform = `scale(${scaleFactor})`;
-            
-            // Vibración visual para llamar la atención
-            btnYes.animate([
-                { transform: `scale(${scaleFactor}) rotate(0deg)` },
-                { transform: `scale(${scaleFactor}) rotate(-3deg)` },
-                { transform: `scale(${scaleFactor}) rotate(3deg)` },
-                { transform: `scale(${scaleFactor}) rotate(0deg)` }
-            ], {
-                duration: 200,
-                iterations: 1
-            });
+        function resetNoButton() {
+            btnNo.style.position = 'absolute';
+            btnNo.style.transform = 'translateX(100px)'; 
+            btnNo.style.top = 'auto';
+            btnNo.style.left = 'auto';
         }
+        
+        function moveNo(e) {
+            if(e && e.cancelable) e.preventDefault();
+
+            const btnYesRect = btnYes.getBoundingClientRect();
+            const safeMargin = 20;
+            const w = window.innerWidth - btnNo.offsetWidth - safeMargin;
+            const h = window.innerHeight - btnNo.offsetHeight - safeMargin;
+
+            let newX, newY;
+            let overlap = true;
+            let attempts = 0;
+
+            while(overlap && attempts < 10) {
+                newX = Math.random() * w + safeMargin/2;
+                newY = Math.random() * h + safeMargin/2;
+                
+                if (newX < btnYesRect.right + 20 && newX + btnNo.offsetWidth > btnYesRect.left - 20 &&
+                    newY < btnYesRect.bottom + 20 && newY + btnNo.offsetHeight > btnYesRect.top - 20) {
+                    overlap = true;
+                } else {
+                    overlap = false;
+                }
+                attempts++;
+            }
+
+            btnNo.style.position = 'fixed'; 
+            btnNo.style.transform = 'none';
+            btnNo.style.left = newX + 'px';
+            btnNo.style.top = newY + 'px';
+
+            scaleFactor += 0.4;
+            btnYes.style.transform = `scale(${scaleFactor})`;
+        }
+
+        btnNo.addEventListener('mouseover', moveNo);
+        btnNo.addEventListener('touchstart', moveNo, {passive: false}); 
+        btnNo.addEventListener('click', moveNo);
 
         function acceptProposal() {
             document.getElementById('proposal-screen').classList.add('hidden');
@@ -890,188 +815,113 @@
             
             const bgMusic = document.getElementById('bg-music');
             const winMusic = document.getElementById('win-music');
-            
-            bgMusic.pause();
-            bgMusic.currentTime = 0;
+            bgMusic.pause(); bgMusic.currentTime = 0;
             winMusic.volume = 0.7;
-            winMusic.play().catch(e => console.log("Audio error")); 
+            winMusic.play().catch(() => {}); 
 
             animateDinner();
             spawnHearts();
         }
 
-        // --- ANIMACIÓN CENA ROMÁNTICA (PERSONALIZADA) ---
+        // --- ANIMACIÓN FINAL ---
         let candleFrame = 0;
 
         function animateDinner() {
             const w = finalCanvas.width;
             const h = finalCanvas.height;
-            
             finalCtx.clearRect(0,0,w,h);
 
-            // Fondo (Ventana y Noche)
-            finalCtx.fillStyle = '#2d3436'; // Pared oscura
-            finalCtx.fillRect(0,0,w,h);
+            // Fondo
+            finalCtx.fillStyle = '#2c3e50'; finalCtx.fillRect(0,0,w,h);
             
-            const wx = w/2 - 120;
-            const wy = h/2 - 220; 
-            
-            // Cielo nocturno en la ventana
-            finalCtx.fillStyle = '#0a0a20'; 
-            finalCtx.fillRect(wx, wy, 240, 200);
-            
-            // Estrellas
-            if(Math.random() > 0.9) {
-                finalCtx.fillStyle = '#fff';
-                finalCtx.fillRect(wx + Math.random()*240, wy + Math.random()*200, 2, 2);
-            }
-            
-            // Luna llena
-            finalCtx.fillStyle = '#f1c40f';
-            finalCtx.beginPath();
-            finalCtx.arc(wx + 180, wy + 60, 25, 0, Math.PI*2);
-            finalCtx.fill();
-
-            // Marco ventana
-            finalCtx.strokeStyle = '#636e72';
-            finalCtx.lineWidth = 8;
-            finalCtx.strokeRect(wx, wy, 240, 200);
-            finalCtx.beginPath();
-            finalCtx.moveTo(wx + 120, wy);
-            finalCtx.lineTo(wx + 120, wy + 200);
-            finalCtx.moveTo(wx, wy + 100);
-            finalCtx.lineTo(wx + 240, wy + 100);
-            finalCtx.stroke();
+            // Ventana
+            const wx = w/2 - 120; const wy = h/2 - 250; 
+            finalCtx.fillStyle = '#0a0a20'; finalCtx.fillRect(wx, wy, 240, 200);
+            if(Math.random()>0.9) { finalCtx.fillStyle='#fff'; finalCtx.fillRect(wx+Math.random()*240, wy+Math.random()*200, 2, 2); }
+            finalCtx.fillStyle='#f1c40f'; finalCtx.beginPath(); finalCtx.arc(wx+180, wy+60, 25, 0, Math.PI*2); finalCtx.fill();
+            finalCtx.strokeStyle='#7f8c8d'; finalCtx.lineWidth=8; finalCtx.strokeRect(wx, wy, 240, 200);
+            finalCtx.beginPath(); finalCtx.moveTo(wx+120, wy); finalCtx.lineTo(wx+120, wy+200); finalCtx.moveTo(wx, wy+100); finalCtx.lineTo(wx+240, wy+100); finalCtx.stroke();
 
             // Mesa
-            const tableY = h - 180; 
-            finalCtx.fillStyle = '#c0392b'; // Mantel rojo elegante
-            finalCtx.fillRect(0, tableY, w, 180);
+            const tableY = h - 200; 
+            finalCtx.fillStyle = '#c0392b'; finalCtx.fillRect(0, tableY, w, 200);
             
-            // Vela central
-            const candleX = w/2;
-            const candleY = tableY + 20;
-            
-            finalCtx.fillStyle = '#eee';
-            finalCtx.fillRect(candleX - 10, candleY - 60, 20, 60);
-            
+            // Vela
+            const candleX = w/2; const candleY = tableY + 20;
+            finalCtx.fillStyle = '#ecf0f1'; finalCtx.fillRect(candleX - 10, candleY - 60, 20, 60);
             candleFrame++;
-            const flicker = Math.sin(candleFrame * 0.2) * 3;
-            const flameH = 25 + flicker;
+            const flameH = 25 + Math.sin(candleFrame * 0.2) * 3;
+            finalCtx.fillStyle = '#e67e22'; finalCtx.beginPath(); finalCtx.ellipse(candleX, candleY - 60 - (flameH/2), 8, flameH/2, 0, 0, Math.PI*2); finalCtx.fill();
+            finalCtx.fillStyle = '#f1c40f'; finalCtx.beginPath(); finalCtx.ellipse(candleX, candleY - 60 - (flameH/2) + 5, 4, flameH/3, 0, 0, Math.PI*2); finalCtx.fill();
             
-            // Llama
-            finalCtx.fillStyle = '#e67e22'; 
-            finalCtx.beginPath();
-            finalCtx.ellipse(candleX, candleY - 60 - (flameH/2), 8, flameH/2, 0, 0, Math.PI*2);
-            finalCtx.fill();
-            finalCtx.fillStyle = '#f1c40f'; 
-            finalCtx.beginPath();
-            finalCtx.ellipse(candleX, candleY - 60 - (flameH/2) + 5, 4, flameH/3, 0, 0, Math.PI*2);
-            finalCtx.fill();
-            
-            // Halo de luz
-            const gradient = finalCtx.createRadialGradient(candleX, candleY - 70, 10, candleX, candleY - 70, 180);
-            gradient.addColorStop(0, 'rgba(255, 234, 167, 0.25)');
-            gradient.addColorStop(1, 'rgba(255, 234, 167, 0)');
-            finalCtx.fillStyle = gradient;
-            finalCtx.beginPath();
-            finalCtx.arc(candleX, candleY - 70, 180, 0, Math.PI*2);
-            finalCtx.fill();
+            const grad = finalCtx.createRadialGradient(candleX, candleY - 70, 10, candleX, candleY - 70, 180);
+            grad.addColorStop(0, 'rgba(255, 234, 167, 0.2)'); grad.addColorStop(1, 'rgba(0,0,0,0)');
+            finalCtx.fillStyle = grad; finalCtx.beginPath(); finalCtx.arc(candleX, candleY - 70, 180, 0, Math.PI*2); finalCtx.fill();
 
             // Copas
-            drawWineGlass(w/2 - 70, tableY + 40);
-            drawWineGlass(w/2 + 70, tableY + 40);
+            drawWineGlass(w/2 - 50, tableY + 30);
+            drawWineGlass(w/2 + 50, tableY + 30);
 
-            // --- DIBUJO DE LA PAREJA (KEVIN Y VERONICA) ---
-            // Basado en la foto: Él a la derecha (camisa clara), Ella a la izquierda (vestido negro)
-            
-            // Veronica (Izquierda)
-            drawPerson(w/2 - 130, tableY + 80, '#2c3e50', 'long', '#1a1a1a'); // Pelo oscuro, vestido negro
-            
-            // Kevin (Derecha)
-            drawPerson(w/2 + 130, tableY + 80, '#2c3e50', 'short', '#b2bec3'); // Pelo oscuro, camisa clara (menta/gris)
+            // Pareja (Rediseñada)
+            drawSilhouette(w/2 - 120, tableY + 60, true);
+            drawSilhouette(w/2 + 120, tableY + 60, false);
 
             requestAnimationFrame(animateDinner);
         }
 
-        function drawPerson(x, y, hairColor, hairStyle, clothesColor) {
-            // Cuerpo/Ropa
-            finalCtx.fillStyle = clothesColor;
-            finalCtx.beginPath();
-            finalCtx.ellipse(x, y + 40, 45, 55, 0, 0, Math.PI*2); // Torso
-            finalCtx.fill();
-
-            // Cabeza/Piel
-            finalCtx.fillStyle = '#f5cba7'; // Tono de piel
-            finalCtx.beginPath();
-            finalCtx.arc(x, y, 35, 0, Math.PI*2);
-            finalCtx.fill();
-
-            // Pelo
-            finalCtx.fillStyle = hairColor;
-            if (hairStyle === 'long') {
-                // Pelo largo de Veronica
+        function drawSilhouette(x, y, isGirl) {
+            const skinColor = '#d9a688'; 
+            
+            if (isGirl) {
+                // VERONICA (Pelo largo, negro, elegante)
+                finalCtx.fillStyle = '#111'; 
+                finalCtx.beginPath(); finalCtx.ellipse(x, y + 50, 35, 55, 0, 0, Math.PI*2); finalCtx.fill(); 
+                finalCtx.fillStyle = skinColor;
+                finalCtx.beginPath(); finalCtx.arc(x, y, 30, 0, Math.PI*2); finalCtx.fill(); 
+                finalCtx.fillStyle = '#0a0a0a';
                 finalCtx.beginPath();
-                finalCtx.arc(x, y, 38, Math.PI, Math.PI*2); // Parte superior
-                finalCtx.lineTo(x + 40, y + 60);
-                finalCtx.lineTo(x - 40, y + 60);
+                finalCtx.arc(x, y - 5, 36, Math.PI, 0); 
+                finalCtx.lineTo(x + 45, y + 80); 
+                finalCtx.lineTo(x - 45, y + 80); 
                 finalCtx.fill();
+                // Collar de perlas (basado en foto)
+                finalCtx.strokeStyle = '#fff'; finalCtx.lineWidth = 2;
+                finalCtx.beginPath(); finalCtx.arc(x, y+25, 12, 0, Math.PI); finalCtx.stroke();
+
             } else {
-                // Pelo corto de Kevin
-                finalCtx.beginPath();
-                finalCtx.arc(x, y - 5, 38, 0.8 * Math.PI, 2.2 * Math.PI);
-                finalCtx.fill();
+                // KEVIN (Camisa clara, pelo corto, sonrisa)
+                finalCtx.fillStyle = '#dbece8'; // Camisa clara
+                finalCtx.beginPath(); finalCtx.ellipse(x, y + 50, 45, 55, 0, 0, Math.PI*2); finalCtx.fill();
+                finalCtx.fillStyle = skinColor;
+                finalCtx.beginPath(); finalCtx.arc(x, y, 32, 0, Math.PI*2); finalCtx.fill();
+                finalCtx.fillStyle = '#1a1a1a'; // Pelo
+                finalCtx.beginPath(); finalCtx.arc(x, y - 8, 34, 0.9*Math.PI, 2.1*Math.PI); finalCtx.fill();
+                // Sonrisa
+                finalCtx.fillStyle = '#fff';
+                finalCtx.beginPath(); finalCtx.arc(x, y + 5, 10, 0.1, Math.PI - 0.1); finalCtx.fill();
             }
-
-            // Sonrisa
-            finalCtx.strokeStyle = '#d35400';
-            finalCtx.lineWidth = 2;
-            finalCtx.beginPath();
-            finalCtx.arc(x, y + 10, 15, 0.2, Math.PI - 0.2);
-            finalCtx.stroke();
         }
 
         function drawWineGlass(x, y) {
-            // Tallo y base
-            finalCtx.fillStyle = 'rgba(255,255,255,0.3)';
-            finalCtx.strokeStyle = '#fff';
-            finalCtx.lineWidth = 1.5;
-            finalCtx.beginPath();
-            finalCtx.moveTo(x, y - 40);
-            finalCtx.lineTo(x, y);
-            finalCtx.stroke();
-            finalCtx.beginPath();
-            finalCtx.moveTo(x - 15, y);
-            finalCtx.lineTo(x + 15, y);
-            finalCtx.stroke();
-            
-            // Copa
-            finalCtx.beginPath();
-            finalCtx.moveTo(x - 20, y - 70);
-            finalCtx.bezierCurveTo(x - 20, y - 30, x + 20, y - 30, x + 20, y - 70);
-            finalCtx.stroke();
-            finalCtx.fill();
-            
-            // Vino
-            finalCtx.fillStyle = '#720e1e'; // Rojo intenso
-            finalCtx.beginPath();
-            finalCtx.moveTo(x - 18, y - 50);
-            finalCtx.bezierCurveTo(x - 18, y - 32, x + 18, y - 32, x + 18, y - 50);
-            finalCtx.fill();
+            finalCtx.fillStyle='rgba(255,255,255,0.2)'; finalCtx.strokeStyle='#fff'; finalCtx.lineWidth=1;
+            finalCtx.beginPath(); finalCtx.moveTo(x,y-40); finalCtx.lineTo(x,y); finalCtx.stroke();
+            finalCtx.beginPath(); finalCtx.moveTo(x-12,y); finalCtx.lineTo(x+12,y); finalCtx.stroke();
+            finalCtx.beginPath(); finalCtx.moveTo(x-15,y-60); finalCtx.bezierCurveTo(x-15,y-30,x+15,y-30,x+15,y-60); finalCtx.fill(); finalCtx.stroke();
+            finalCtx.fillStyle='#720e1e';
+            finalCtx.beginPath(); finalCtx.moveTo(x-13,y-45); finalCtx.bezierCurveTo(x-13,y-32,x+13,y-32,x+13,y-45); finalCtx.fill();
         }
 
         function spawnHearts() {
             setInterval(() => {
                 const h = document.createElement('div');
                 h.classList.add('heart-particle');
-                h.innerHTML = Math.random() > 0.6 ? '❤️' : (Math.random() > 0.5 ? '💖' : '✨');
-                h.style.left = Math.random() * 100 + 'vw';
-                h.style.top = '105vh';
+                h.innerHTML = Math.random()>0.5 ? '❤️' : '✨';
+                h.style.left = Math.random()*100 + 'vw';
+                h.style.top = '100vh';
                 document.body.appendChild(h);
-                setTimeout(() => h.remove(), 4000);
+                setTimeout(()=>h.remove(), 4000);
             }, 300);
         }
-
     </script>
 </body>
 </html>
